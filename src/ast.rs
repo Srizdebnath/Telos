@@ -7,6 +7,11 @@ pub enum Type {
     Char,
     Byte,
     Custom(String),
+    Refinement {
+        base: Box<Type>,
+        value_name: String,
+        predicate: Expression,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -107,9 +112,16 @@ pub struct FunctionDeclaration {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub struct TypeAliasDeclaration {
+    pub name: String,
+    pub ty: Type,
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub enum TopLevel {
     Module(String),
     Struct(StructDeclaration),
+    TypeAlias(TypeAliasDeclaration),
     Intent(IntentDeclaration),
     Function(FunctionDeclaration),
 }

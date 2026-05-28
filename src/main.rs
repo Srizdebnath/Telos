@@ -59,8 +59,7 @@ fn main() {
     let mut structs = Vec::new();
     let mut intents = HashMap::new();
     let mut functions = Vec::new();
-
-
+    let mut type_aliases = HashMap::new();
 
     for decl in &program.declarations {
         match decl {
@@ -69,6 +68,9 @@ fn main() {
                 intents.insert(i.name.clone(), i.clone());
             }
             TopLevel::Function(f) => functions.push(f.clone()),
+            TopLevel::TypeAlias(ta) => {
+                type_aliases.insert(ta.name.clone(), ta.ty.clone());
+            }
             _ => {}
         }
     }
@@ -97,7 +99,7 @@ fn main() {
                 }
             };
 
-            let mut verifier = Verifier::new(&ctx, &structs);
+            let mut verifier = Verifier::new(&ctx, &structs, &type_aliases);
             match verifier.verify_function(func, intent) {
                 Ok(_) => {
                     println!("Verification Succeeded for function '{}' against intent '{}'.", func.name, intent_name);

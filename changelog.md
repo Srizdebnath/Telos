@@ -39,3 +39,11 @@ All notable changes to the Telos compiler bootstrap chain are documented here.
 ## [Stage 7] - Bootstrap Stability Validation Generation V
 ### Added
 - **Stage 7 Idempotence Validation (`build_stage7.sh`)**: Compiles `compiler.tl` using compiled Stage 6 outputs to produce `compiler_stage7.rs`. Performs bit-for-bit source verification against clean Stage 6 output to guarantee absolute compiler stability and idempotence across successive self-hosted compile generations. Builds and validates the `stage7_telos` binary.
+
+## [Verification Engine Expansion] - SMT Primitives, Refinement Types & Invariants
+### Added
+- **Expanded SMT Primitives**: Support for `Float` (mapped to Z3 Real Rational arithmetic), `Byte` (Z3 Bit-Vectors), and `String` (Z3 Strings) in SMT verification engine.
+- **Refinement Types**: Fully integrated parser support and static verification of trailing `where` refinements (e.g. `type PositiveInt = Int where value > 0`) checked dynamically during local variable bindings (`let`) and mutations/assignments.
+- **Invariant Tracking Engine**: Integrated multi-boundary invariant tracking. Pre-invariants are checked on entry, mid-block invariants are verified after every mutating state change/assignment statement, and terminal invariants are checked as post-conditions.
+- **Zero-Cost Abstractions**: Transpilation lowered verification invariants and refinement constraints down to base primitives with zero runtime overhead.
+- **Regression Tests**: Added regression tests verifying correct refinement type checks (`refinement_test.tl`) and multi-boundary invariant checks (`invariant_test.tl`).

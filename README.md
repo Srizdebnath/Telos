@@ -10,11 +10,16 @@ Telos is an **Intent-Oriented Systems Programming Language (IOPL)** designed to 
    - Uses **Satisfiability Modulo Theories (SMT)** via an integrated Z3 solver.
    - Translates code blocks into Single Static Assignment (SSA) mathematical formulas.
    - Assertions of preconditions and negated postconditions are evaluated at compile time. Compilation halts immediately with counterexamples if a bug is found.
-2. **Linear Ownership & Affine Types**:
+2. **Refinement Types**:
+   - Supports predicate logic constraints on types (e.g. `type PositiveInt = Int where value > 0`).
+   - Recursively resolves type alias references and verifies refinement assertions on local bindings (`let`) and assignments at compile time.
+3. **Invariant Tracking Loop**:
+   - Enforces safety-critical constraints across mutational state changes. Checks pre-invariants on entry, mid-block invariants after mutating statements, and terminal invariants.
+4. **Linear Ownership & Affine Types**:
    - Enforces single-owner resource management.
    - Prevents mutable/immutable aliasing and resource racing during compilation.
-3. **Zero-Cost Abstractions**:
-   - Verification code (`intent`, `preconditions`, `postconditions`, `invariants`, `satisfies`) exists solely for compilation guardrails.
+5. **Zero-Cost Abstractions**:
+   - Verification code (`intent`, `preconditions`, `postconditions`, `invariants`, `satisfies`, type refinements) exists solely for compilation guardrails.
    - The transpiler strips these assertions at target generation, translating Telos directly to raw, high-performance machine code.
 
 ---

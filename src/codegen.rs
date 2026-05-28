@@ -43,6 +43,9 @@ impl Codegen {
                     }
                     out.push_str("}\n\n");
                 }
+                TopLevel::TypeAlias(ta) => {
+                    out.push_str(&format!("pub type {} = {};\n\n", ta.name, Self::transpile_type(&ta.ty)));
+                }
             }
         }
         out
@@ -57,6 +60,7 @@ impl Codegen {
             Type::Char => "char".to_string(),
             Type::Byte => "u8".to_string(),
             Type::Custom(name) => name.clone(),
+            Type::Refinement { base, .. } => Self::transpile_type(base),
         }
     }
 

@@ -74,7 +74,17 @@ impl Parser {
                 let name = self.expect_identifier()?;
                 declarations.push(TopLevel::Module(name));
             } else if self.check(&Token::TypeKeyword) {
-                declarations.push(TopLevel::Struct(self.parse_struct()?));
+                let mut is_struct = false;
+                if self.pos + 3 < self.tokens.len() {
+                    if let (Token::Eq, Token::Struct) = (&self.tokens[self.pos + 2].0, &self.tokens[self.pos + 3].0) {
+                        is_struct = true;
+                    }
+                }
+                if is_struct {
+                    declarations.push(TopLevel::Struct(self.parse_struct()?));
+                } else {
+                    declarations.push(TopLevel::TypeAlias(self.parse_type_alias()?));
+                }
             } else if self.check(&Token::Intent) {
                 declarations.push(TopLevel::Intent(self.parse_intent()?));
             } else if self.check(&Token::Fn) || self.check(&Token::Pub) {
@@ -85,6 +95,15 @@ impl Parser {
             }
         }
         Ok(Program { declarations })
+    }
+
+    fn parse_type_alias(&mut self) -> Result<TypeAliasDeclaration, String> {
+        self.expect(&Token::TypeKeyword)?;
+        let name = self.expect_identifier()?;
+        self.expect(&Token::Eq)?;
+        let ty = self.parse_type()?;
+        self.match_token(&Token::Semicolon);
+        Ok(TypeAliasDeclaration { name, ty })
     }
 
     fn parse_struct(&mut self) -> Result<StructDeclaration, String> {
@@ -114,17 +133,32 @@ impl Parser {
 
     fn parse_type(&mut self) -> Result<Type, String> {
         let (l, c) = self.peek_pos();
-        match self.advance() {
+        let base = match self.advance() {
             Some(Token::Identifier(ref s)) => match s.as_str() {
-                "Int" => Ok(Type::Int),
-                "Float" => Ok(Type::Float),
-                "Bool" => Ok(Type::Bool),
-                "String" => Ok(Type::String),
-                "Char" => Ok(Type::Char),
-                "Byte" => Ok(Type::Byte),
-                other => Ok(Type::Custom(other.to_string())),
+                "Int" => Type::Int,
+                "Float" => Type::Float,
+                "Bool" => Type::Bool,
+                "String" => Type::String,
+                "Char" => Type::Char,
+                "Byte" => Type::Byte,
+                other => Type::Custom(other.to_string()),
             },
-            other => Err(format!("{}:{}: Expected type name, found {:?}", l, c, other)),
+            other => return Err(format!("{}:{}: Expected type name, found {:?}", l, c, other)),
+        };
+
+        if self.match_token(&Token::Where) {
+            let value_name = match self.peek() {
+                Some(Token::Identifier(name)) => name.clone(),
+                _ => "value".to_string(),
+            };
+            let predicate = self.parse_expression()?;
+            Ok(Type::Refinement {
+                base: Box::new(base),
+                value_name,
+                predicate,
+            })
+        } else {
+            Ok(base)
         }
     }
 
