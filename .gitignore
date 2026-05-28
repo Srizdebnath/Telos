@@ -1,0 +1,7 @@
+/target
+/stage*_telos
+/compiler.rs
+/compiler_stage*.rs
+/banking_test.rs
+/buggy_banking_test.rs
+/borrow_fail.rs
